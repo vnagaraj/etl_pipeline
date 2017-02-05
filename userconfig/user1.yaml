@@ -1,0 +1,7 @@
+id: pipeline_1
+desc: filterlines having Iran in input
+input:  destfile_1.txt
+output: output_1
+transforms:
+        - textInputFormat
+        - filterRecord Iran
