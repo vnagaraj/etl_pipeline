@@ -12,8 +12,9 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<flink.version>1.0.0</flink.version>
+		<flink.version>1.1.4</flink.version>
 	</properties>
+
 
 	<repositories>
 		<repository>
@@ -30,6 +31,10 @@
 		<repository>
 			<id>conjars.org</id>
 			<url>http://conjars.org/repo</url>
+		</repository>
+		<repository>
+			<id>bintray-ottogroup-maven</id>
+			<url>https://api.bintray.com/maven/ottogroup/maven/flinkspector</url>
 		</repository>
 	</repositories>
 
@@ -272,7 +277,7 @@
 						</descriptorRefs>
 						<archive>
 							<manifest>
-								<mainClass>etl.Transform</mainClass>
+								<mainClass>etl.FlinkTransform</mainClass>
 							</manifest>
 						</archive>
 

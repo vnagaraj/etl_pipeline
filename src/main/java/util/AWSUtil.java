@@ -28,6 +28,8 @@ public class AWSUtil {
 
     public static final String input_bucket = "*****";
 
+    public static final String output_bucket = "*****";
+
     public static final String queueUrl = "*****";
 
     public static final String filePath = System.getProperty("user.dir")+ "/";
