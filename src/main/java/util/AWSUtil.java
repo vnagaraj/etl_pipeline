@@ -24,9 +24,11 @@ public class AWSUtil {
 
     public static final AWSCredentials credentials = new BasicAWSCredentials(
             "*****",
-            "****");
+            "*****");
 
     public static final String input_bucket = "*****";
+
+    public static final String queueUrl = "*****";
 
     public static final String filePath = System.getProperty("user.dir")+ "/";
 
@@ -48,5 +50,24 @@ public class AWSUtil {
         String log4jConfigFile = System.getProperty("user.dir")
                 + File.separator + "log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
+    }
+
+    public static String getFileName(String message) {
+        String result = null;
+        try {
+            // convert JSON string to Map
+            HashMap<String, String> hashMap = new HashMap<String, String>();
+            JSONObject json = new JSONObject(message);
+            JSONArray records = (JSONArray) json.get("Records");
+            JSONObject records0 = (JSONObject) records.get(0);
+            JSONObject s3 = (JSONObject) records0.get("s3");
+            JSONObject object = (JSONObject) s3.get("object");
+            result =  (String) object.get("key");
+        }
+        catch (JSONException e){
+            logger.error("Failure to parse sqs message " + message);
+            System.exit(-1);
+        }
+        return result;
     }
 }
