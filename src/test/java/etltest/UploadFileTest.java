@@ -10,6 +10,8 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.services.s3.model.ListObjectsRequest;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import org.junit.AfterClass;
 import util.AWSUtil;
 
 
@@ -60,5 +62,10 @@ public class UploadFileTest
         }
         assertTrue("Failure to verify file upload", found);
 
+    }
+
+    public void tearDown(){
+        AmazonS3 s3client = new AmazonS3Client(AWSUtil.credentials);
+        s3client.deleteObject(new DeleteObjectRequest(AWSUtil.input_bucket, "destfile_1.txt"));
     }
 }
