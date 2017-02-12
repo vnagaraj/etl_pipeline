@@ -3,8 +3,8 @@ package etltest;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
-import etl.ReadFromQueue;
-import etl.UploadFile;
+import etl.ReadMessageFromQueue;
+import etl.UploadFiles;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -38,7 +38,7 @@ public class ReadFromQueueTest extends TestCase
     }
 
     public void setUp(){
-        UploadFile.run("user1.yaml");
+        UploadFiles.run("userconfig");
     }
 
     /*
@@ -47,7 +47,7 @@ public class ReadFromQueueTest extends TestCase
      */
     public void testReadFromQueue()
     {
-        ReadFromQueue.run("user1.yaml");
+        ReadMessageFromQueue.readFromSQSQueue();
     }
 
     public void tearDown()
