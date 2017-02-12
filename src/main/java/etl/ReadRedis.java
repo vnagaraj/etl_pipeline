@@ -6,6 +6,7 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import util.AWSUtil;
 import java.io.*;
+import java.util.HashMap;
 
 
 /**
@@ -48,7 +49,8 @@ public class ReadRedis {
         if(f.isFile()) {
             String fileName = AWSUtil.readFromFile(filePathString);
             //check in redis for fileName
-            JedisPool pool = new JedisPool(new JedisPoolConfig(), AWSUtil.redis_master);
+            HashMap<String, String> values = AWSUtil.configProperties();
+            JedisPool pool = new JedisPool(new JedisPoolConfig(), values.get(AWSUtil.redismaster));
             Jedis jedis = pool.getResource();
             if (jedis.exists(fileName)){
                 String val = jedis.get(fileName);

@@ -9,6 +9,7 @@ import util.FileInfo;
 import redis.clients.jedis.Jedis;
 
 import java.io.File;
+import java.util.HashMap;
 
 
 /**
@@ -37,7 +38,8 @@ public class StoreRedis {
             System.exit(-1);
         }
         logger.info("Storing in Redis");
-        JedisPool pool = new JedisPool(new JedisPoolConfig(), AWSUtil.redis_master);
+        HashMap<String, String> values = AWSUtil.configProperties();
+        JedisPool pool = new JedisPool(new JedisPoolConfig(), values.get(AWSUtil.redismaster));
         Jedis jedis = pool.getResource();
         for (File file: files) {
             if (!file.getName().endsWith("yaml")){

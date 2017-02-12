@@ -1,5 +1,7 @@
 package etl;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
@@ -9,6 +11,7 @@ import util.FileInfo;
 import util.ReadYaml;
 
 import java.io.File;
+import java.util.HashMap;
 
 /**
  * Preprocessing step of ETL Pipeline:
@@ -39,14 +42,19 @@ public class UploadFiles {
         if (files == null){
             return;
         }
-        AmazonS3 s3client = new AmazonS3Client(AWSUtil.credentials);
-        if (AWSUtil.isBucketValid(s3client, AWSUtil.input_bucket)){
+        HashMap<String, String> values = AWSUtil.configProperties();
+        String awsKey = values.get(AWSUtil.awsKey);
+        String awsPassword = values.get(AWSUtil.awsPassword);
+        AWSCredentials credentials = new BasicAWSCredentials(awsKey, awsPassword);
+        AmazonS3 s3client = new AmazonS3Client(credentials);
+        String inputBucket = values.get(AWSUtil.input_bucket);
+        if (AWSUtil.isBucketValid(s3client, inputBucket)){
             for (File file: files) {
-                s3client.putObject(new PutObjectRequest(AWSUtil.input_bucket, file.getName(), file));
+                s3client.putObject(new PutObjectRequest(inputBucket, file.getName(), file));
             }
         }
         else{
-            logger.error("Invalid bucket " + AWSUtil.input_bucket);
+            logger.error("Invalid bucket " + inputBucket);
             System.exit(-1);
         }
 

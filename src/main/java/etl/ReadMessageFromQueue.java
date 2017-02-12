@@ -1,5 +1,7 @@
 package etl;
 
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.regions.Region;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.sqs.AmazonSQS;
@@ -10,6 +12,7 @@ import com.amazonaws.services.sqs.model.ReceiveMessageRequest;
 import org.apache.log4j.Logger;
 import util.AWSUtil;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -42,12 +45,16 @@ public class ReadMessageFromQueue {
      *
      */
     public static String readFromSQSQueue() {
-        AmazonSQS sqs = new AmazonSQSAsyncClient(AWSUtil.credentials);
+        HashMap<String, String> values = AWSUtil.configProperties();
+        String queryUrl = values.get(AWSUtil.queryurl);
+        AWSCredentials credentials = new BasicAWSCredentials(values.get(AWSUtil.awsKey),
+                                        values.get(AWSUtil.awsPassword));
+        AmazonSQS sqs = new AmazonSQSAsyncClient(credentials);
         Region usWest2 = Region.getRegion(Regions.US_WEST_2);
         sqs.setRegion(usWest2);
         AWSUtil.configureLog();
         ReceiveMessageRequest receiveMessageRequest = new
-                ReceiveMessageRequest(AWSUtil.queueUrl);
+                ReceiveMessageRequest(queryUrl);
         List<Message> messages =
                 sqs.receiveMessage(receiveMessageRequest).getMessages();
         String fileName = null;
@@ -56,7 +63,7 @@ public class ReadMessageFromQueue {
             String m = message.getBody();
             fileName = AWSUtil.getFileName(m);
             logger.info("Got filename "+ fileName);
-            deleteMessage(sqs, message);
+            deleteMessage(sqs, message, queryUrl);
         }else{
             logger.warn("filename set to None");
             logger.warn("fail the pipeline");
@@ -69,9 +76,9 @@ public class ReadMessageFromQueue {
      * Delete message after processing message from SQS queue
      * @param message
      */
-    private static  void deleteMessage(AmazonSQS sqs, Message message){
+    private static  void deleteMessage(AmazonSQS sqs, Message message, String queryUrl){
         sqs.deleteMessage(new DeleteMessageRequest()
-                .withQueueUrl(AWSUtil.queueUrl)
+                .withQueueUrl(queryUrl)
                 .withReceiptHandle(message.getReceiptHandle()));
     }
 

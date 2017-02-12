@@ -12,6 +12,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
 import java.io.*;
+import java.util.Properties;
 import java.util.HashMap;
 
 /**
@@ -22,23 +23,29 @@ import java.util.HashMap;
  */
 public class AWSUtil {
 
-    public static final AWSCredentials credentials = new BasicAWSCredentials(
-            "*****",
-            "*****");
-
-    public static final String queueUrl = "*****";
-
-    public static final String input_bucket = "*****";
-
-    public static final String output_bucket = "*****";
-
-    public static final String redis_master = "*****";
-
     public static final String filePath = System.getProperty("user.dir")+ "/";
 
     public static final String tmp = filePath + "tmp/";
 
     public static final String pipeline = "pipeline.log";
+
+    public static final String awsKey = "awsKey";
+
+    public static final String awsPassword = "awspassword";
+
+    public static final String input_bucket = "input_bucket";
+
+    public static final String output_bucket = "output_bucket";
+
+    public static final String queryurl = "queryurl";
+
+    public static final String redismaster = "redis_master";
+
+    public static final String configProperties = "config.properties";
+
+    public static final String userDir = "user.dir";
+
+    public static final String log4jProperties = "log4j.properties";
 
     private static Logger logger = Logger.getLogger(AWSUtil.class);
 
@@ -55,9 +62,37 @@ public class AWSUtil {
      * Configure Log4J properties
      */
     public static void configureLog(){
-        String log4jConfigFile = System.getProperty("user.dir")
-                + File.separator + "log4j.properties";
+        String log4jConfigFile = System.getProperty(userDir)
+                + File.separator + log4jProperties;
         PropertyConfigurator.configure(log4jConfigFile);
+    }
+
+    /**
+     * Configure configProperties
+     * @return
+     * @throws IOException
+     */
+    public static HashMap<String, String> configProperties()  {
+        HashMap<String, String> map = new HashMap<String, String>();
+
+        try {
+            Properties prop = new Properties();
+            String propFileName = configProperties;
+            InputStream inputStream = new FileInputStream(propFileName);
+            prop.load(inputStream);
+
+            map.put(awsKey, prop.getProperty(awsKey));
+            map.put(awsPassword, prop.getProperty(awsPassword));
+            map.put(input_bucket, prop.getProperty(input_bucket));
+            map.put(output_bucket, prop.getProperty(output_bucket));
+            map.put(queryurl, prop.getProperty(queryurl));
+            map.put(redismaster, prop.getProperty(redismaster));
+        }
+        catch(IOException e){
+            logger.error("Not able to load properties file");
+            System.exit(-1);
+        }
+        return map;
     }
 
     public static String getFileName(String message) {
@@ -80,11 +115,6 @@ public class AWSUtil {
     }
 
     public static void writeToFile(String path, String message) throws IOException {
-        /*
-        if (message == null){
-            logger.warn("No message to write");
-            return;
-        }*/
         BufferedWriter writer = null;
         try{
             File file = new File(path);
