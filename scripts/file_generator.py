@@ -4,7 +4,7 @@ import sys
 
 
 path = os.path.split(os.path.abspath(os.getcwd()))[0]
-parent_path = os.path.join(path, "files/")
+parent_path = os.path.join(path, "etl_pipeline/files/")
 prefix = "inputfile_"
 seed = "1092384956781341341234656953214543219"
 first_file = os.path.join(parent_path, "inputfile_1.txt")

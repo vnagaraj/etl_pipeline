@@ -1,16 +1,19 @@
-from os.path import expanduser
 import os
-
-home = expanduser("~")
-path = os.path.join(home +"/efs/etl_pipeline/airflow/")
+import sys
 
 
-def gen_pipelines():
-	fname = os.path.join(path, "pipelines")
+current_path = os.path.split(os.path.abspath(os.getcwd()))[0]
+path = os.path.join(current_path, "etl_pipeline/airflow/")
+fname = os.path.join(path, "pipelines")
+
+def gen_pipelines(count):
         fh = open(fname, 'w+')
-        for i in range(1, 31):
+        for i in range(1, count+1):
             fh.write("etl" +str(i) + "\n")
         fh.close()
 
 if __name__ == "__main__":
-    gen_pipelines()
+    count = 1
+    if len(sys.argv) == 2:
+        count = int(sys.argv[1])
+    gen_pipelines(count)
