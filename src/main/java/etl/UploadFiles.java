@@ -7,38 +7,43 @@ import org.apache.log4j.Logger;
 import util.AWSUtil;
 import util.FileInfo;
 import util.ReadYaml;
+
 import java.io.File;
 
 /**
- * STEP1 of ETL Pipeline:
- * Upload file to S3 Bucket
+ * Preprocessing step of ETL Pipeline:
+ * Uploads files to S3 bucket
  *
  * @author Vivekanand Ganapathy Nagarajan
- * @version 1.0 Feb 5th, 2017
+ * @version 2.0 Feb 5th, 2017
  */
-public class UploadFile {
-    private static Logger logger = Logger.getLogger(UploadFile.class);
+public class UploadFiles {
+    private static Logger logger = Logger.getLogger(UploadFiles.class);
 
     public static void main(String[] args) {
         AWSUtil.configureLog();
         if (args.length < 1){
-            logger.error("user config not specified");
+            logger.error("file location not specified");
             System.exit(-1);
         }
         run(args[0]);
     }
 
     /**
-     * Uploads a file from local user's directory/files/filename to S3 bucket
+     * Uploads batch of files in S3 bucket, mimics user's request
      *
-     * @param fileName
+     * @param fileDir
      */
-    public static void run(String fileName){
-        FileInfo fileInfo = ReadYaml.readYaml(AWSUtil.filePath + "userconfig/" + fileName);
+    public static void run(String fileDir){
+        File[] files = new File(fileDir).listFiles();
+        if (files == null){
+            return;
+        }
         AmazonS3 s3client = new AmazonS3Client(AWSUtil.credentials);
         if (AWSUtil.isBucketValid(s3client, AWSUtil.input_bucket)){
-            File file = new File("files/" + fileInfo.getInput());
-            s3client.putObject(new PutObjectRequest(AWSUtil.input_bucket, fileInfo.getInput(), file));
+            for (File file: files) {
+                s3client.putObject(new PutObjectRequest(AWSUtil.input_bucket, file.getName(), file));
+            }
         }
         else{
             logger.error("Invalid bucket " + AWSUtil.input_bucket);
