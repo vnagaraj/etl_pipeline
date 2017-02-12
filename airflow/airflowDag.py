@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import os
 
 
+
 default_args = {
   'owner': 'airflow',
   'depends_on_past': False,
@@ -13,38 +14,27 @@ default_args = {
   'retry_delay': timedelta(minutes=1),
 }
 
-input_file = '/Users/vivekanandganapathynagarajan/Documents/Insight/etl_pipeline/airflow/dags'
+input_file = '/home/ubuntu/efs/etl_pipeline/airflow/pipelines'
 
 
 with open(input_file,'r') as f:
     for line in f:
         dagid = line.strip().split(',')[0]
-        yaml = line.strip().split(',')[1]
+        #yaml = line.strip().split(',')[1]
         dag = DAG(
             dagid, default_args=default_args, schedule_interval="@once")
         globals()[dagid] = dag
-        uploadFile= BashOperator(
-            task_id='uploadS3',
-            bash_command= "cd ~/Documents/Insight/etl_pipeline/ && mvn exec:java -Dexec.mainClass=etl.UploadFile -Dexec.args=" + yaml,
+        readMessageFromQueue = BashOperator(
+              task_id='readMessageFromQueue',
+            bash_command= "cd ~/efs/etl_pipeline/ && mvn exec:java -Dexec.mainClass=etl.ReadMessageFromQueue -Dexec.args=" +dagid,
             dag=dag)
-        readSQS = BashOperator(
-              task_id='readSQS',
-            bash_command= "cd ~/Documents/Insight/etl_pipeline/ && mvn exec:java -Dexec.mainClass=etl.ReadFromQueue -Dexec.args=" + yaml,
+        readRedis = BashOperator(
+              task_id='readRedis',
+            bash_command= "cd ~/efs/etl_pipeline/ && mvn exec:java -Dexec.mainClass=etl.ReadRedis -Dexec.args=" +dagid,
             dag=dag)
-        readSQS.set_upstream(uploadFile)
-        setupJar = BashOperator(
-              task_id='setupJar',
-            bash_command= "scp ~/Documents/Insight/etl_pipeline/target/etl-0.1.jar ubuntu@masternode:/home/ubuntu",
-            dag=dag)
-        setupJar.set_upstream(readSQS)
-        copyYaml = BashOperator(
-          task_id='uConfig' + dagid,
-        bash_command= "scp ~/Documents/Insight/etl/log4j.properties ubuntu@masternode:/home/ubuntu && scp ~/Documents/Insight/etl/userconfig/" + yaml + " ubuntu@masternode:/home/ubuntu",
-        dag=dag)
-        copyYaml.set_upstream(readSQS)
         flinkTransform = BashOperator(
-          task_id='flinkTransform',
-        bash_command= "ssh ubuntu@masternode " + "'/usr/local/flink/bin/flink run  -c etl.FlinkTransform ~/etl-0.1.jar -u " + yaml+"'",
-        dag=dag)
-        flinkTransform.set_upstream(copyYaml)
+              task_id='flinkTransform',
+            bash_command= "ssh ubuntu@flinkmaster  " + "'/usr/local/flink/bin/flink run  -c etl.FlinkTransform /home/ubuntu/efs/etl_pipeline/target/etl-0.1.jar -d "+dagid+"'", dag=dag)
+        readRedis.set_upstream(readMessageFromQueue)
+        flinkTransform.set_upstream(readRedis)
 f.close()
