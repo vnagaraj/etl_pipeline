@@ -14,13 +14,15 @@ import net.sourceforge.argparse4j.inf.ArgumentParser;
 import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
+import java.io.File;
+
 
 /**
  * STEP3 of ETL Pipeline:
  * Perform Flink Transformations
  *
  * @author Vivekanand Ganapathy Nagarajan
- * @version 1.0 Feb 5th, 2017
+ * @version 2.0 Feb 5th, 2017
  */
 public class FlinkTransform {
 
@@ -29,15 +31,16 @@ public class FlinkTransform {
 
 
     public static void main(String[] args) throws Exception {
+        AWSUtil.configureLog();
         if (args.length < 1){
-            logger.error("user config not specified");
-            System.exit(-1);
+            logger.error("dagid not specified");
+	    System.exit(-1);
         }
-        ArgumentParser parser = ArgumentParsers.newArgumentParser("UserConfig")
+        ArgumentParser parser = ArgumentParsers.newArgumentParser("dagid")
                 .defaultHelp(true)
-                .description("User config.");
-        parser.addArgument("-u", "--userConfig")
-                .help("user config file");
+                .description("DagId");
+        parser.addArgument("-d", "--dagid")
+                .help("dagid");
         Namespace ns = null;
         try {
             ns = parser.parseArgs(args);
@@ -45,18 +48,26 @@ public class FlinkTransform {
             parser.handleError(e);
             System.exit(1);
         }
-        String fileName = ns.getString("userConfig");
-        fileInfo = ReadYaml.readYaml(fileName);
-        flinkExecute();
-
-
+        String dagid = ns.getString("dagid");
+        String filePathString = AWSUtil.tmp + dagid + "/" + AWSUtil.pipeline;
+        logger.info("filepathString " + filePathString);
+        File f = new File(filePathString);
+        if(f.isFile()) {
+            String fileName = AWSUtil.readFromFile(filePathString);
+            fileInfo = ReadYaml.readYaml(AWSUtil.filePath + "userconfig/" + fileName);
+            flinkExecute();
+        } else{
+            logger.warn("No entry in log");
+            logger.warn("Failing job");
+            System.exit(-1);
+        }
     }
 
     /**
      * Execute flink transformations
-     * @throws java.lang.Exception
+     * @throws Exception
      */
-    private static void flinkExecute() throws java.lang.Exception{
+    private static void flinkExecute() throws Exception{
         // set up the execution environment
         final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
         String path = AWSUtil.input_bucket +"/"+fileInfo.getInput();
@@ -65,7 +76,7 @@ public class FlinkTransform {
     }
 
     /**
-     * Set up flink transformations
+     * Set up flink transformations based on user input
      * @param env remote environment
      * @param path input path in s3 bucket
      * @param transforms user specified transformations
