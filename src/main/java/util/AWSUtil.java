@@ -11,7 +11,7 @@ import com.amazonaws.util.json.JSONObject;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
 
-import java.io.File;
+import java.io.*;
 import java.util.HashMap;
 
 /**
@@ -26,13 +26,19 @@ public class AWSUtil {
             "*****",
             "*****");
 
+    public static final String queueUrl = "*****";
+
     public static final String input_bucket = "*****";
 
     public static final String output_bucket = "*****";
 
-    public static final String queueUrl = "*****";
+    public static final String redis_master = "*****";
 
     public static final String filePath = System.getProperty("user.dir")+ "/";
+
+    public static final String tmp = filePath + "tmp/";
+
+    public static final String pipeline = "pipeline.log";
 
     private static Logger logger = Logger.getLogger(AWSUtil.class);
 
@@ -72,4 +78,45 @@ public class AWSUtil {
         }
         return result;
     }
+
+    public static void writeToFile(String path, String message) throws IOException {
+        /*
+        if (message == null){
+            logger.warn("No message to write");
+            return;
+        }*/
+        BufferedWriter writer = null;
+        try{
+            File file = new File(path);
+            writer = new BufferedWriter(new FileWriter(file));
+            writer.write(message);
+        } finally {
+            if (writer != null) {
+                writer.close();
+            }
+        }
+    }
+
+    public static String readFromFile(String path) throws IOException {
+        BufferedReader Buff = new BufferedReader(new FileReader(path));
+        String text = Buff.readLine();
+        logger.info("Got fileName " + text);
+        return text;
+    }
+
+    public static void createUserDir(final String dirName)  {
+        try {
+            final File homeDir = new File(AWSUtil.filePath + "tmp/");
+            final File dir = new File(homeDir, dirName);
+            if (!dir.exists() && !dir.mkdirs()) {
+                logger.warn("Directory exists " + dirName);
+                return;
+            }
+        }
+        catch (Exception e){
+            logger.error("Failure to create directory " + dirName);
+            System.exit(-1);
+        }
+    }
+
 }
