@@ -62,8 +62,8 @@ public class AWSUtil {
      * Configure Log4J properties
      */
     public static void configureLog(){
-        String log4jConfigFile = System.getProperty(userDir)
-                + File.separator + log4jProperties;
+        HashMap<String, String> values = configProperties();
+        String log4jConfigFile = values.get("log4jlocation");
         PropertyConfigurator.configure(log4jConfigFile);
     }
 
