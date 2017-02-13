@@ -51,7 +51,6 @@ public class AWSUtil {
 
     public static final String userConfig = "userconfig/";
 
-    public static final String userdir = "userdir";
 
     public static final String dagid = "dagid";
 
@@ -102,7 +101,6 @@ public class AWSUtil {
             map.put(output_bucket, prop.getProperty(output_bucket));
             map.put(queryurl, prop.getProperty(queryurl));
             map.put(redismaster, prop.getProperty(redismaster));
-            map.put(userdir, prop.getProperty(userdir));
         }
         catch(IOException e){
             System.exit(-1);
@@ -151,8 +149,7 @@ public class AWSUtil {
 
     public static void createUserDir(final String dirName)  {
         try {
-            HashMap<String, String> values = AWSUtil.configProperties();
-            String projectPath = values.get(AWSUtil.userdir);
+            String projectPath = System.getProperty(AWSUtil.homeDir) + "/";
             final File homeDir = new File(projectPath + "tmp/");
             final File dir = new File(homeDir, dirName);
             if (!dir.exists() && !dir.mkdirs()) {
