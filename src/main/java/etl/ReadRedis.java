@@ -30,7 +30,7 @@ public class ReadRedis {
             logger.error("dagid not specified");
             System.exit(-1);
         }
-        String filePathString = AWSUtil.homeDir + AWSUtil.tmp + args[0]+"/" + AWSUtil.pipeline;
+        String filePathString = System.getProperty(AWSUtil.homeDir)+ "/"  + AWSUtil.tmp + args[0]+"/" + AWSUtil.pipeline;
         outputUser(filePathString);
 
     }
@@ -45,7 +45,8 @@ public class ReadRedis {
      * @throws IOException
      */
     private static void outputUser(String filePathString) throws IOException{
-        File f = new File(filePathString);
+        logger.info("file " + filePathString);
+	File f = new File(filePathString);
         if(f.isFile()) {
             String fileName = AWSUtil.readFromFile(filePathString);
             //check in redis for fileName
