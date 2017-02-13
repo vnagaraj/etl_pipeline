@@ -88,10 +88,10 @@ public class AWSUtil {
 
         try {
             Properties prop = new Properties();
-            String configFile = System.getProperty("user.dir") + configProperties;
+            String configFile = System.getProperty(homeDir) + configProperties;
             File f = new File(configFile);
             if (!f.exists()){
-                configFile = System.getProperty("user.dir") + "/efs/etl_pipeline/" + configProperties;
+                configFile = System.getProperty(homeDir) + AWSUtil.flinkPath + configProperties;
             }
             InputStream inputStream = new FileInputStream(configFile);
             prop.load(inputStream);

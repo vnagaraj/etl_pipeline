@@ -7,8 +7,7 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import org.apache.log4j.Logger;
 import util.AWSUtil;
-import util.FileInfo;
-import util.ReadYaml;
+
 
 import java.io.File;
 import java.util.HashMap;

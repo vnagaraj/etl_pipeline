@@ -15,7 +15,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import java.io.File;
-
+import java.util.HashMap;
 
 
 /**
@@ -29,10 +29,12 @@ public class FlinkTransform {
 
     private static FileInfo fileInfo;
     private static Logger logger = Logger.getLogger(FlinkTransform.class);
+    private static HashMap<String, String> values = null;
 
 
     public static void main(String[] args) throws Exception {
         AWSUtil.configureLog();
+        values = AWSUtil.configProperties();
         if (args.length < 1){
             logger.error("dagid not specified");
 	    System.exit(-1);
@@ -72,7 +74,8 @@ public class FlinkTransform {
     private static void flinkExecute() throws Exception{
         // set up the execution environment
         final ExecutionEnvironment env = ExecutionEnvironment.getExecutionEnvironment();
-        String path = AWSUtil.input_bucket +"/"+fileInfo.getInput();
+        String input_bucket = values.get(AWSUtil.input_bucket);
+        String path = input_bucket +"/"+fileInfo.getInput();
         setupFlinkTransforms(env, path,  fileInfo.getTransforms());
         env.execute();
     }
@@ -112,6 +115,7 @@ public class FlinkTransform {
            logger.error("outputFormat not set ");
             System.exit(-1);
         }
-        dataSet.writeAsText("s3a://"+ AWSUtil.output_bucket +"/" + fileInfo.getOutput());
+        String output_bucket = values.get(AWSUtil.output_bucket);
+        dataSet.writeAsText("s3a://"+ output_bucket +"/" + fileInfo.getOutput());
     }
 }
