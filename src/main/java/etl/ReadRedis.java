@@ -30,7 +30,9 @@ public class ReadRedis {
             logger.error("dagid not specified");
             System.exit(-1);
         }
-        String filePathString = AWSUtil.tmp + args[0]+"/" + AWSUtil.pipeline;
+        HashMap<String, String> values = AWSUtil.configProperties();
+        String project_location = values.get("project_location");
+        String filePathString = project_location + AWSUtil.tmp + args[0]+"/" + AWSUtil.pipeline;
         outputUser(filePathString);
 
     }

@@ -23,9 +23,9 @@ import java.util.HashMap;
  */
 public class AWSUtil {
 
-    public static final String filePath = System.getProperty("user.dir")+ "/";
 
-    public static final String tmp = filePath + "tmp/";
+
+    public static final String tmp = "tmp/";
 
     public static final String pipeline = "pipeline.log";
 
@@ -43,9 +43,13 @@ public class AWSUtil {
 
     public static final String configProperties = "config.properties";
 
-    public static final String userDir = "user.dir";
-
     public static final String log4jProperties = "log4j.properties";
+
+    public static final String userConfig = "userconfig/";
+
+    public static final String userdir = "userdir";
+
+    public static final String dagid = "dagid";
 
     private static Logger logger = Logger.getLogger(AWSUtil.class);
 
@@ -63,7 +67,8 @@ public class AWSUtil {
      */
     public static void configureLog(){
         HashMap<String, String> values = configProperties();
-        String log4jConfigFile = values.get("log4jlocation");
+        String projectPath = values.get("project_location");
+        String log4jConfigFile = projectPath + "/" + log4jProperties;
         PropertyConfigurator.configure(log4jConfigFile);
     }
 
@@ -136,7 +141,9 @@ public class AWSUtil {
 
     public static void createUserDir(final String dirName)  {
         try {
-            final File homeDir = new File(AWSUtil.filePath + "tmp/");
+            HashMap<String, String> values = AWSUtil.configProperties();
+            String projectPath = values.get(AWSUtil.userdir);
+            final File homeDir = new File(projectPath + "tmp/");
             final File dir = new File(homeDir, dirName);
             if (!dir.exists() && !dir.mkdirs()) {
                 logger.warn("Directory exists " + dirName);
