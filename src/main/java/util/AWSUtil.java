@@ -27,6 +27,10 @@ public class AWSUtil {
 
     public static final String tmp = "tmp/";
 
+    public static final String flinkPath = "/efs/etl_pipeline/";
+
+    public static final String homeDir = "user.dir";
+
     public static final String pipeline = "pipeline.log";
 
     public static final String awsKey = "awsKey";
@@ -41,9 +45,9 @@ public class AWSUtil {
 
     public static final String redismaster = "redis_master";
 
-    public static final String configProperties = "config.properties";
+    public static final String configProperties = "/config.properties";
 
-    public static final String log4jProperties = "log4j.properties";
+    public static final String log4jProperties = "/log4j.properties";
 
     public static final String userConfig = "userconfig/";
 
@@ -66,9 +70,11 @@ public class AWSUtil {
      * Configure Log4J properties
      */
     public static void configureLog(){
-        HashMap<String, String> values = configProperties();
-        String projectPath = values.get("project_location");
-        String log4jConfigFile = projectPath + "/" + log4jProperties;
+        String log4jConfigFile = System.getProperty(homeDir) + log4jProperties;
+        File f = new File(log4jConfigFile);
+        if (!f.exists()){
+            log4jConfigFile = System.getProperty(homeDir) + flinkPath + log4jProperties;
+        }
         PropertyConfigurator.configure(log4jConfigFile);
     }
 
@@ -82,8 +88,12 @@ public class AWSUtil {
 
         try {
             Properties prop = new Properties();
-            String propFileName = configProperties;
-            InputStream inputStream = new FileInputStream(propFileName);
+            String configFile = System.getProperty("user.dir") + configProperties;
+            File f = new File(configFile);
+            if (!f.exists()){
+                configFile = System.getProperty("user.dir") + "/efs/etl_pipeline/" + configProperties;
+            }
+            InputStream inputStream = new FileInputStream(configFile);
             prop.load(inputStream);
 
             map.put(awsKey, prop.getProperty(awsKey));
@@ -92,9 +102,9 @@ public class AWSUtil {
             map.put(output_bucket, prop.getProperty(output_bucket));
             map.put(queryurl, prop.getProperty(queryurl));
             map.put(redismaster, prop.getProperty(redismaster));
+            map.put(userdir, prop.getProperty(userdir));
         }
         catch(IOException e){
-            logger.error("Not able to load properties file");
             System.exit(-1);
         }
         return map;

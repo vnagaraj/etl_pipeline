@@ -15,7 +15,7 @@ import net.sourceforge.argparse4j.inf.ArgumentParserException;
 import net.sourceforge.argparse4j.inf.Namespace;
 
 import java.io.File;
-import java.util.HashMap;
+
 
 
 /**
@@ -49,8 +49,7 @@ public class FlinkTransform {
             parser.handleError(e);
             System.exit(1);
         }
-        HashMap<String, String> values = AWSUtil.configProperties();
-        String projectPath = values.get(AWSUtil.userdir);
+        String projectPath = System.getProperty(AWSUtil.homeDir) + AWSUtil.flinkPath;
         String dagid = ns.getString(AWSUtil.dagid);
         String filePathString = projectPath + AWSUtil.tmp + dagid + "/" + AWSUtil.pipeline;
         logger.info("filepathString " + filePathString);
