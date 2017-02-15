@@ -10,9 +10,10 @@ if you are using a distributed envt
 For remote flink master, make sure the /efs/etl_pipeline is the repo location.
 
 
-### Prerequisites
+## Prerequisites
 
-#Software
+###Software
+
 1. Amazon S3 buckets ( for input and output)
 2. Amazon SQS queue ( to be configured to receive event noticiations when file is uploaded to S3)
 3. Airflow installation (preferably in distributed mode, 1 airflow master and 2 airflow workers)
@@ -22,7 +23,8 @@ For remote flink master, make sure the /efs/etl_pipeline is the repo location.
 5. Flink installation in cluster mode ( 1 flink master with 3 flink workers)
    Please refer to the following (https://ci.apache.org/projects/flink/flink-docs-release-0.8/cluster_setup.html)
 
-#Configure Setting
+###Configure Setting
+
 1. Specify ~/.ssh/config in all nodes with Amazon pem key and the flinkMaster location
 eg)
 Host flinkMaster
@@ -37,9 +39,10 @@ Host flinkMaster
 eg) ubuntu@node:/etl_pipeline$ mvn clean
     ubuntu@node:/etl_pipeline$ mvn package -Dmaven.test.skip=true
 
-### Steps
+## Steps
 
-# Simulate Data
+### Simulate Data
+
 1. Generate files to upload to S3 input bucket
 ubuntu@node:/etl_pipeline$ python  ./scripts/file_generator.py <count>
 eg)ubuntu@node:/etl_pipeline$ python ./scripts/file_generator.py 30
@@ -56,7 +59,8 @@ eg)ubuntu@node:/etl_pipeline$ python ./scripts/yaml_generator.py 35
    reading messages from the queue, so preferable to have pipelines generated for every message in queue to not
    miss any userInfo.
 
-# Preprocessing stage
+### Preprocessing stage
+
 1. Upload files into S3 bucket
 ubuntu@node:/etl_pipeline$ mvn exec:java -Dexec.mainClass=etl.UploadFiles -Dexec.args=files
  This command uploads all the files in location etl_pipeline/files/ to S3 bucket
@@ -64,7 +68,8 @@ ubuntu@node:/etl_pipeline$ mvn exec:java -Dexec.mainClass=etl.UploadFiles -Dexec
 ubuntu@node:/etl_pipeline$ mvn exec:java -Dexec.mainClass=etl.StoreRedis -Dexec.args=userconfig
  This command stores the filename as key and yaml as value for each user#.yaml file.
 
-# Running the pipelines
+### Running the pipelines
+
 1. Specify the following configuration for airflow master and worker nodes
 (~/airflow/airflow.cfg)
 dags_folder = /etl_pipeline/airflow
@@ -85,12 +90,8 @@ http://<airflowmaster public DNS>:5555/admin/
 http://<flinkMaster>:8081/#/overview
 
 
-###Testing
+##Testing
 
-ubuntu@airflowmaasternode:airflow test etl1 readMessageFromQueue 2017-02-12
-tp.impl.conn.PoolingClientConnectionManager  - Connection manager is shutting down
-[2017-02-13 04:48:43,064] {bash_operator.py:79} INFO - Command exited with return code 0
+ubuntu@airflowmasternode:~/efs/etl_pipeline$ ./airflow/airflowtest.sh
+Verified all the stages of a single pipeline
 
-ubuntu@airflowmaasternode:airflow test etl1 readRedis 2017-02-12
-
-ubuntu@airflowmaasternode:airflow test etl1 flinkTransform 2017-02-12
